@@ -1,0 +1,41 @@
+.layer-filter { min-width: 0; }
+.layer-filter > span:nth-child(2) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.layer-color-control {
+  width: 24px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.layer-color-control input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  padding: 2px;
+  border: 1px solid #c7d4bf;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  overflow: hidden;
+}
+.layer-color-control input::-webkit-color-swatch-wrapper { padding: 0; }
+.layer-color-control input::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.layer-color-control input::-moz-color-swatch { border: 0; border-radius: 50%; }
+.layer-color-control input:focus-visible { outline: 2px solid #12665b; outline-offset: 3px; }
+.layer-elements-tree { margin: 0 7px 10px 35px; padding: 3px 0 3px 10px; border-left: 1px solid #dfe8d7; }
+.layer-feature-row { display: flex; align-items: center; min-width: 0; gap: 3px; }
+.layer-feature-row .folder-route { flex: 1; min-width: 0; }
+.layer-feature-row .visibility-button { width: 26px; height: 29px; margin: 0; flex-shrink: 0; }
+.layer-feature-row .visibility-button svg { width: 12px; height: 12px; }
+.layer-feature-row.muted .folder-route:not(.selected) { opacity: .5; }
+.list-more { display: flex; margin: 15px 23px 22px; font-size: 11px; }
+.node-marker > span { border-color: var(--node-color, #4c6073); }
+.node-destino > span { background: var(--node-color, #4c6073); border-color: white; box-shadow: 0 0 0 1px var(--node-color, #4c6073); }
+@media (max-width: 760px) {
+  .layer-color-control { width: 28px; height: 38px; }
+  .layer-color-control input { width: 21px; height: 21px; }
+  .layer-feature-row .visibility-button { width: 30px; height: 34px; }
+}

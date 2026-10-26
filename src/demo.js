@@ -1,8 +1,8 @@
-import { emptyProject, uid } from './model.js';
+import { emptyProject, uid, isBusLayer, inferBusLine } from './model.js';
 export function createDemo() {
   const p = emptyProject();
   p.name = 'Ejemplo · Buenos Aires';
-  const line = (name, layer, coords) => ({ id: uid(), name, layer, source: 'Ejemplo ilustrativo · No usar para viajar', description: 'Trazado simplificado de demostración; no representa un servicio oficial ni su recorrido preciso.', geometry: { type: 'LineString', coordinates: coords.map(([lat, lng]) => [lng, lat]) } });
+  const line = (name, layer, coords) => ({ id: uid(), name, layer, ...(isBusLayer(layer) ? { busLine: inferBusLine(name) } : {}), source: 'Ejemplo ilustrativo · No usar para viajar', description: 'Trazado simplificado de demostración; no representa un servicio oficial ni su recorrido preciso.', geometry: { type: 'LineString', coordinates: coords.map(([lat, lng]) => [lng, lat]) } });
   p.features = [
     line('Mitre · Retiro – Tigre', 'regional', [[-34.5908,-58.3747],[-34.5675,-58.4084],[-34.5505,-58.438],[-34.5358,-58.4698],[-34.5105,-58.489],[-34.4749,-58.515],[-34.425,-58.579]]),
     line('Roca · Constitución – Avellaneda', 'urbano', [[-34.627,-58.3816],[-34.643,-58.3789],[-34.6517,-58.3863],[-34.665,-58.375],[-34.683,-58.359]]),

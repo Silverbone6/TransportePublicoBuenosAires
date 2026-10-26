@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+  <Folder><name>Colectivo local</name>
+    <Folder><name>Línea 59</name>
+      <Placemark><name>59 · Ida</name><LineString><coordinates>-58.47,-34.62 -58.45,-34.615 -58.43,-34.61 -58.41,-34.605 -58.39,-34.60</coordinates></LineString></Placemark>
+      <Placemark><name>59 · Vuelta</name><LineString><coordinates>-58.39,-34.602 -58.41,-34.607 -58.43,-34.612 -58.45,-34.617 -58.47,-34.622</coordinates></LineString></Placemark>
+    </Folder>
+    <Folder><name>Línea 152</name><Placemark><name>152 · Local</name><LineString><coordinates>-58.45,-34.635 -58.42,-34.625 -58.39,-34.615</coordinates></LineString></Placemark></Folder>
+    <Placemark><name>Recorrido sin referencia</name><LineString><coordinates>-58.48,-34.64 -58.46,-34.63</coordinates></LineString></Placemark>
+  </Folder>
+  <Folder><name>Colectivo troncal</name>
+    <Folder><name>Línea 59</name><Placemark><name>59 · Troncal</name><LineString><coordinates>-58.42,-34.64 -58.4,-34.62 -58.38,-34.60</coordinates></LineString></Placemark></Folder>
+  </Folder>
+</Document></kml>

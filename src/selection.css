@@ -1,0 +1,47 @@
+.selected-route-path { filter: drop-shadow(0 2px 2px #491a3430); }
+.selected-route-casing { pointer-events: none; }
+.leaflet-tooltip.selected-route-tooltip {
+  padding: 8px 12px;
+  border: 1px solid #d02670;
+  border-radius: 7px;
+  background: #fff7fb;
+  color: #8d174e;
+  box-shadow: 0 3px 14px #491a3420;
+  font-family: inherit;
+  pointer-events: none;
+  opacity: 1 !important;
+}
+.selected-route-tooltip::before { border-top-color: #d02670; }
+.selected-route-tooltip > span { display: flex; flex-direction: column; gap: 4px; }
+.selected-route-tooltip small { font-size: 8px; font-weight: 700; letter-spacing: 1px; color: #b94376; }
+.selected-route-tooltip strong { max-width: 240px; overflow: hidden; text-overflow: ellipsis; font-size: 12px; font-weight: 650; }
+.selected-route-endpoint { background: none; border: 0; pointer-events: none !important; }
+.selected-route-endpoint > span {
+  display: inline-flex;
+  height: 24px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 7px;
+  background: #fff;
+  border: 2px solid #d02670;
+  border-radius: 5px;
+  box-shadow: 0 2px 7px #491a3420;
+  color: #a51e5b;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: .5px;
+}
+.selected-route-endpoint.start { text-align: right; }
+.route-row.selected, .route-row.selected:hover { background: #fff0f6; border-color: #d02670; }
+.route-row.selected .route-item strong { color: #8d174e; font-weight: 700; }
+.route-row.selected .route-glyph, .route-row.selected .route-item > svg { color: #d02670; }
+.folder-route.selected, .folder-route.selected:hover {
+  background: #fff0f6;
+  color: #8d174e;
+  box-shadow: inset 3px 0 #d02670;
+  font-weight: 650;
+}
+.folder-route.selected svg { color: #d02670; }
+@media (max-width: 760px) {
+  .selected-route-tooltip strong { max-width: 180px; font-size: 11px; }
+}

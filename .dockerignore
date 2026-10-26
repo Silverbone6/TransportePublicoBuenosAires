@@ -6,3 +6,4 @@ dist
 .aws
 test-results
 playwright-report
+data

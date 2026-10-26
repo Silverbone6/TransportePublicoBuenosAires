@@ -1,16 +1,17 @@
 import { test, expect } from '@playwright/test';
-import { readFile } from 'node:fs/promises';
+import { readFile, rm } from 'node:fs/promises';
 import path from 'node:path';
 const fixture = path.resolve('tests/fixtures/recorridos.kml');
 
 // Geometry tests do not need external map tiles or load public tile servers.
 test.beforeEach(async ({ page }) => {
+  await rm(path.join(process.env.TRAMA_E2E_DATA_DIR, 'proyecto.json'), { force: true });
   await page.route('https://tile.openstreetmap.org/**', (route) => route.fulfill({ status: 200, contentType: 'image/png', body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64') }));
 });
 
 async function ready(page) {
   await page.goto('/');
-  await expect(page.locator('#save-status')).toContainText('Guardado');
+  await expect(page.locator('#save-status')).toContainText(/Guardado|Repositorio listo/);
 }
 async function importFixture(page) {
   await page.locator('.header-actions [data-action="import"]').click();
@@ -164,4 +165,85 @@ test('mobile workspace has no horizontal overflow and provides working layer nav
   await page.locator('[data-feature]').first().click();
   await expect(page.locator('.inspector-card')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+function busFolder(page, layer, label) {
+  return page.locator(`.bus-layer-tree[aria-label="Líneas de ${layer}"] .line-folder`).filter({ has: page.locator('.line-folder-filter > span').filter({ hasText: new RegExp(`^${label}$`) }) });
+}
+async function importGroupedBuses(page) {
+  await ready(page);
+  await page.locator('.header-actions [data-action="import"]').click();
+  await page.locator('#kml-files').setInputFiles(path.resolve('tests/fixtures/colectivos-agrupados.kml'));
+  await page.locator('#import-confirm').click();
+  await expect(page.locator('#route-list .route-row')).toHaveCount(5);
+}
+
+test('bus folders expand, filter, hide independently by layer, and retain visibility in backups and reloads', async ({ page }) => {
+  await importGroupedBuses(page);
+  const local59 = busFolder(page, 'Colectivo local', 'Línea 59');
+  const trunk59 = busFolder(page, 'Colectivo troncal', 'Línea 59');
+  const paths = page.locator('.leaflet-overlay-pane path.leaflet-interactive');
+  await expect(local59.locator('.line-folder-filter small')).toHaveText('2');
+  await expect(trunk59.locator('.line-folder-filter small')).toHaveText('1');
+  await expect(busFolder(page, 'Colectivo local', 'Sin línea asignada')).toBeVisible();
+  await local59.locator('.folder-expand').click();
+  await expect(local59.locator('[data-group-feature]')).toHaveCount(2);
+  await local59.locator('.folder-expand').click();
+  await expect(local59.locator('[data-group-feature]')).toHaveCount(0);
+  await expect(paths).toHaveCount(5);
+  await local59.locator('[data-line-filter]').click();
+  await expect(page.locator('#route-list .route-row')).toHaveCount(2);
+  await local59.locator('[data-line-visibility]').click();
+  await expect(paths).toHaveCount(3);
+  await expect(trunk59.locator('[data-line-visibility]')).toHaveAttribute('aria-checked','true');
+  await page.locator('[data-visibility="local"]').click(); await expect(paths).toHaveCount(1);
+  await page.locator('[data-visibility="local"]').click(); await expect(paths).toHaveCount(3);
+  await page.locator('[data-action="visibility-all"]').click(); await expect(paths).toHaveCount(0);
+  await page.locator('[data-action="visibility-all"]').click(); await expect(paths).toHaveCount(5);
+  await local59.locator('[data-line-visibility]').click();
+  await expect(page.locator('#save-status')).toContainText('Guardado');
+  await page.reload(); await expect(paths).toHaveCount(3);
+  await expect(local59.locator('[data-line-visibility]')).toHaveAttribute('aria-checked','false');
+  const backup = await exportProject(page);
+  expect(backup.features.filter((f) => f.layer === 'local' && f.busLine === 'Línea 59')).toHaveLength(2);
+  expect(backup.lineVisibility['["local","linea 59"]']).toBe(false);
+  await page.locator('#project-file').setInputFiles({name:'carpetas.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
+  await page.locator('#confirm-dialog').click(); await expect(paths).toHaveCount(3);
+});
+
+test('bus routes can be grouped, renamed, reassigned and cut without losing their line', async ({ page }) => {
+  await importGroupedBuses(page);
+  await busFolder(page, 'Colectivo local', 'Línea 59').locator('[data-line-filter]').click();
+  await page.locator('#check-all').check();
+  await page.locator('#batch-bus-line').fill('42'); await page.locator('[data-action="batch-group"]').click();
+  const local42 = busFolder(page, 'Colectivo local', 'Línea 42');
+  await expect(local42.locator('.line-folder-filter small')).toHaveText('2');
+  await expect(busFolder(page, 'Colectivo troncal', 'Línea 59')).toHaveCount(1);
+  await local42.locator('[data-rename-line]').click();
+  await page.locator('#rename-line-name').fill('43'); await page.locator('#rename-line-form button[type="submit"]').click();
+  await expect(busFolder(page,'Colectivo local','Línea 43')).toHaveCount(1);
+  await page.locator('#undo').click(); await expect(local42).toHaveCount(1);
+  await page.locator('#redo').click();
+  const local43 = busFolder(page,'Colectivo local','Línea 43');
+  await local43.locator('[data-line-filter]').click();
+  await page.locator('#route-list [data-feature]').first().click();
+  await page.locator('#feature-bus-line').fill('59'); await page.locator('#feature-bus-line').press('Tab');
+  await expect(page.locator('#feature-bus-line')).toHaveValue('Línea 59');
+  await expect(busFolder(page,'Colectivo local','Línea 59').locator('.line-folder-filter small')).toHaveText('1');
+  await page.locator('.edit-tools [data-tool="split"]').click(); await clickLine(page,.45);
+  await page.locator('[data-action="apply-cut"]').click();
+  const local59 = busFolder(page,'Colectivo local','Línea 59');
+  await expect(local59.locator('.line-folder-filter small')).toHaveText('2');
+  await local59.locator('[data-line-filter]').click();
+  await page.locator('#check-all').check(); await page.locator('#batch-layer').selectOption('troncal');
+  await page.locator('[data-action="batch-move"]').click();
+  await expect(busFolder(page,'Colectivo troncal','Línea 59').locator('.line-folder-filter small')).toHaveText('3');
+  await expect(local59).toHaveCount(0);
+  const backup = await exportProject(page);
+  expect(backup.features.filter((f) => f.layer === 'troncal' && f.busLine === 'Línea 59')).toHaveLength(3);
+  const pendingDownload = page.waitForEvent('download');
+  await page.locator('[data-action="export"]').click(); await page.locator('[data-action="download-kml"]').click();
+  const xml = await readFile(await (await pendingDownload).path(),'utf8');
+  expect(xml).toContain('<Folder><name>Línea 59</name>');
+  expect(xml.match(/<Placemark>/g)).toHaveLength(6);
 });
