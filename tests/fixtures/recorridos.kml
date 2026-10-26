@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2"><Document>
+  <name>Ejemplo para practicar recortes</name>
+  <Folder><name>Colectivo local</name><Placemark><name>Línea de prueba · Local y troncal</name><description>Geometría ilustrativa para practicar, no es un recorrido oficial.</description><LineString><coordinates>-58.47,-34.62 -58.45,-34.615 -58.43,-34.61 -58.41,-34.605 -58.39,-34.60 -58.37,-34.595</coordinates></LineString></Placemark></Folder>
+  <Folder><name>Nodos</name><Placemark><name>Nodo de prueba</name><Point><coordinates>-58.43,-34.61,0</coordinates></Point></Placemark></Folder>
+</Document></kml>
